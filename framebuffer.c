@@ -5,7 +5,10 @@
 #include <linux/fb.h>
 #include <sys/mman.h>
 #include <sys/ioctl.h>
+#include <string.h>
 #define N 10
+#define xpos 200
+#define ypos 200
 struct fb_var_screeninfo varinfo;
 struct fb_fix_screeninfo fixinfo;	
 int fp = 0;				//file descriptor
@@ -56,14 +59,13 @@ void drawChar() { //draw the character 'a'
 	for(i = 0;i<N;i++){
 		for(j = 0;j<N;j++){
 			if(char_a[i][j]==1){
-				pixel(j,i); //switch i,j i(row) j(column)
+				pixel(j + xpos,i + ypos); //switch i,j i(row) j(column)
 			}	
 		}
 	}	
 }
 int main() {
-	//int addr = 0xe8000000;
-	//void* p = NULL;
+	//char* p = 0xe8000000;
 	fp=open("/dev/fb0",O_RDWR);  //open /dev/fb0
 	if(fp<0){
 		printf("Error opening /dev/fb0.\n");
@@ -75,11 +77,13 @@ int main() {
 	}
 	size = varinfo.xres * varinfo.yres * varinfo.bits_per_pixel / 8; //calculate the length of the mapping
 	printf("size: %ld k\n",size/1024);
-	fbp = (char *)mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fp, 0);
+	fbp = (char *)mmap(p, size, PROT_READ | PROT_WRITE, MAP_SHARED, fp, 0);
 	if((int)fbp == -1){
 		printf("Error mapping framebuffer to memory.\n");
 		return 0;
 	}
+	long int n = fixinfo.line_length * (varinfo.yres / 2); 
+	memset(fbp, 0, n);   //optional 
 	drawChar();
 	munmap(fbp, size);
 	close(fp);
