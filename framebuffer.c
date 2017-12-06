@@ -83,8 +83,7 @@ int main() {
 		printf("Error mapping framebuffer to memory.\n");
 		exit(3);
 	}
-	long int n = fixinfo.line_length * (varinfo.yres / 2); 
-	memset(fbp, 0, n); 
+	memset(fbp, 0, size/2); 
 	drawChar();
 	munmap(fbp, size);
 	close(fp);
