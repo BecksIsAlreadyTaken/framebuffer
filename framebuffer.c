@@ -65,25 +65,26 @@ void drawChar() { //draw the character 'a'
 	}	
 }
 int main() {
-	//char* p = 0xe8000000;
+	char* p = NULL;
+	//char* p = 0xe8000000;   //test
 	fp=open("/dev/fb0",O_RDWR);  //open /dev/fb0
 	if(fp<0){
 		printf("Error opening /dev/fb0.\n");
-		return 0;
+		exit(1);
 	}
 	if(!get_info(fp)){
 		printf("Error reading framebuffer device info.\n");
-		return 0;	
+		exit(2);	
 	}
 	size = varinfo.xres * varinfo.yres * varinfo.bits_per_pixel / 8; //calculate the length of the mapping
 	printf("size: %ld k\n",size/1024);
 	fbp = (char *)mmap(p, size, PROT_READ | PROT_WRITE, MAP_SHARED, fp, 0);
 	if((int)fbp == -1){
 		printf("Error mapping framebuffer to memory.\n");
-		return 0;
+		exit(3);
 	}
 	long int n = fixinfo.line_length * (varinfo.yres / 2); 
-	memset(fbp, 0, n);   //optional 
+	memset(fbp, 0, n); 
 	drawChar();
 	munmap(fbp, size);
 	close(fp);
